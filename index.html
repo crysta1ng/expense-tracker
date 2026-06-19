@@ -891,6 +891,7 @@ function renderSheet(){
   if(ui.sheet==='listperiod') return optionSheet('Period', [['all','All time'],['week','Week'],['month','Month'],['year','Year'],['custom','Custom range']].map(function(p){ return {label:p[1], sel:ui.listPeriod===p[0], act:'pickListPeriod', arg:p[0]}; }));
   if(ui.sheet==='exportInfo') return infoModal('Export backup','This downloads <b>all</b> your data (wallets, transactions, categories, budgets &amp; labels) as a single <b>.json</b> file. Keep it safe, or use it later via Import to restore everything.','confirmExport','Download backup');
   if(ui.sheet==='importInfo') return infoModal('Import data','A <b>.json</b> backup restores everything. To import a <b>.csv</b>, download the template below, fill it in, then choose your file.<br><br><span style="color:'+INK+';font-weight:700;">Date, Type, Category, Amount, Wallet, Note, Labels</span><div data-act="downloadTemplate" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;border:1.5px solid '+GREEN+';color:'+GREEN+';border-radius:13px;padding:11px;font-weight:700;cursor:pointer;">'+svg('<path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M5 21h14"></path>',18)+'Download CSV template</div>','confirmImport','Choose file');
+  if(ui.sheet==='installsteps') return installStepsSheet();
   return '';
 }
 function infoModal(title, body, continueAct, continueLabel){
@@ -902,6 +903,28 @@ function infoModal(title, body, continueAct, continueLabel){
         '<div data-act="closeSheet" style="flex:1;text-align:center;padding:13px;border-radius:13px;font-weight:700;color:#5B616E;background:var(--line);cursor:pointer;">Cancel</div>'+
         '<div data-act="'+continueAct+'" style="flex:1;text-align:center;padding:13px;border-radius:13px;font-weight:700;color:#fff;background:'+GREEN+';cursor:pointer;">'+continueLabel+'</div>'+
       '</div>'+
+    '</div></div>';
+}
+function installStepsSheet(){
+  var iconBubble=function(inner){ return '<span style="width:34px;height:34px;border-radius:10px;background:#EAF1FB;color:#2563EB;display:flex;align-items:center;justify-content:center;flex:none;">'+inner+'</span>'; };
+  var shareI=svg('<path d="M12 15V4"></path><path d="M8 8l4-4 4 4"></path><path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path>',18);
+  var dotsI='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>';
+  var moreI=svg('<circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle>',18);
+  var addI=svg('<rect x="4" y="3" width="16" height="18" rx="3"></rect><path d="M12 9v6M9 12h6"></path>',18);
+  var step=function(n,icon,text){ return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);">'+
+    '<div style="width:24px;height:24px;border-radius:50%;background:'+HERO+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none;">'+n+'</div>'+
+    iconBubble(icon)+'<div style="flex:1;font-size:14px;font-weight:600;color:var(--text);line-height:1.4;">'+text+'</div></div>'; };
+  var steps = isIOS()
+    ? step(1,shareI,'Tap the <b>Share</b> button in Safari’s toolbar')+step(2,moreI,'Scroll down the share sheet')+step(3,addI,'Tap <b>Add to Home Screen</b>, then <b>Add</b>')
+    : step(1,dotsI,'Tap the <b>⋮ menu</b> (top-right)')+step(2,moreI,'Tap <b>Add to Home screen</b> (or “Install app”)')+step(3,addI,'Confirm <b>Add</b> — done!');
+  return '<div data-act="closeSheet" style="position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:46;display:flex;align-items:flex-end;">'+
+    '<div data-act="noop" style="width:100%;background:var(--surface);border-radius:20px 20px 0 0;padding:18px 18px calc(env(safe-area-inset-bottom,0px) + 18px);box-sizing:border-box;">'+
+      '<div style="width:38px;height:4px;border-radius:2px;background:var(--line2);margin:0 auto 14px;"></div>'+
+      '<div style="font-size:17px;font-weight:800;color:var(--text);">Add to Home Screen</div>'+
+      '<div style="font-size:12.5px;color:#8A8F98;margin:4px 0 6px;">Install it for a full-screen, app-like experience.</div>'+
+      steps+
+      '<div style="font-size:11.5px;color:#9AA0AB;margin-top:10px;line-height:1.5;">On a different browser, look for &ldquo;Add to Home Screen&rdquo; in the Share or menu options.</div>'+
+      '<div data-act="closeSheet" style="margin-top:14px;text-align:center;padding:13px;border-radius:13px;font-weight:700;color:#fff;background:'+GREEN+';cursor:pointer;">Got it</div>'+
     '</div></div>';
 }
 function optionSheet(title, items){
@@ -920,10 +943,10 @@ function installDismissed(){ try{ return localStorage.getItem('et_install_dismis
 function renderInstall(){
   var el=document.getElementById('install'); if(!el) return;
   if(isStandalone()||installDismissed()||(!deferredPrompt && !isIOS())){ el.innerHTML=''; return; }
-  var iosShare='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M12 15V4"></path><path d="M8 8l4-4 4 4"></path><path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>';
+  var phoneI=svg('<rect x="6" y="3" width="12" height="18" rx="3"></rect><path d="M11 18h2"></path>',20);
   var body = deferredPrompt
-    ? '<div style="flex:1;font-size:13.5px;color:var(--text);font-weight:600;">Install the app for a full-screen experience.</div><div data-act="doInstall" style="background:'+GREEN+';color:#fff;font-weight:700;font-size:13px;padding:9px 14px;border-radius:11px;cursor:pointer;white-space:nowrap;">Install</div>'
-    : '<div style="flex:1;font-size:13px;color:var(--text);font-weight:600;line-height:1.5;">Add to your Home Screen: tap '+iosShare+' then <b>Add to Home Screen</b>.</div>';
+    ? '<span style="color:'+GREEN+';display:flex;flex:none;">'+phoneI+'</span><div style="flex:1;font-size:13.5px;color:var(--text);font-weight:600;">Install the app for a full-screen experience.</div><div data-act="doInstall" style="background:'+GREEN+';color:#fff;font-weight:700;font-size:13px;padding:9px 14px;border-radius:11px;cursor:pointer;white-space:nowrap;">Install</div>'
+    : '<span style="color:'+GREEN+';display:flex;flex:none;">'+phoneI+'</span><div data-act="installSteps" style="flex:1;cursor:pointer;"><div style="font-size:13.5px;color:var(--text);font-weight:700;">Add to Home Screen</div><div style="font-size:12px;color:#2563EB;font-weight:700;">Tap to see the steps &rsaquo;</div></div>';
   el.innerHTML='<div style="position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(20,23,28,.20);">'+body+'<div data-act="dismissInstall" style="color:#9AA0AB;cursor:pointer;display:flex;flex:none;padding:2px;">'+svg('<path d="M6 6l12 12M18 6L6 18"></path>',16)+'</div></div>';
 }
 window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredPrompt=e; renderInstall(); });
@@ -1134,6 +1157,7 @@ var ACTIONS={
   setTheme:function(a){ state.theme=a; save(); render(); },
   doInstall:function(){ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(function(){ deferredPrompt=null; renderInstall(); }); } },
   dismissInstall:function(){ try{ localStorage.setItem('et_install_dismissed','1'); }catch(e){} renderInstall(); },
+  installSteps:function(){ ui.sheet='installsteps'; render(); },
   openProfile:function(){ ui.profileName=(state.profile&&state.profile.name)||''; go('profile'); },
   saveProfile:function(){ syncInputs(); if(!state.profile) state.profile={name:'',photo:''}; state.profile.name=(ui.profileName||'').trim(); save(); go('settings'); flash('✓ Profile saved'); },
   profilePhotoSheet:function(){ syncInputs(); ui.photoTarget='profile'; ui.sheet='photo'; render(); },
