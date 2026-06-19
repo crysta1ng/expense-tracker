@@ -103,6 +103,16 @@ function defaultIncomeCats(){ return [
   {name:'Gifts',icon:'gift',color:'#DB2777'},{name:'Extra Income',icon:'extra',color:'#E8A11C'},
   {name:'Loan',icon:'loan',color:'#7C3AED'},{name:'Other',icon:'other',color:'#8A8F98'} ]; }
 
+// Empty starting state for brand-new users (no demo data)
+function freshState(){
+  return {
+    wallets:[{id:'w'+Date.now(),name:'Cash',type:'Cash',icon:'cash',color:'#3A3E46',opening:0}],
+    tx:[], expenseCats:defaultExpenseCats(), incomeCats:defaultIncomeCats(),
+    budgets:[], totalBudget:{enabled:false,limit:0}, recurring:[], userLabels:[],
+    profile:{name:'',photo:''}, theme:'light'
+  };
+}
+
 function seedState(){
   var W = [
     {id:'w1',name:'Maybank',type:'Bank account',icon:'bank',color:'#2563EB',opening:4200},
@@ -171,7 +181,7 @@ var state = null;       // persisted data
 var ui = null;          // transient UI state
 function load(){
   try{ var d=JSON.parse(localStorage.getItem(STORE_KEY)); if(d&&d.wallets){ if(!d.profile) d.profile={name:'',photo:''}; if(!d.theme) d.theme='light'; return d; } }catch(e){}
-  return seedState();
+  return freshState();
 }
 function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
 function resetUI(){
