@@ -1,6 +1,6 @@
 // Offline cache + controlled updates for the Expense Tracker PWA.
 // VERSION is bumped automatically on every build so clients pick up new releases.
-const VERSION = '20260619-101217';
+const VERSION = '20260619-101908';
 const CACHE = 'expense-tracker-' + VERSION;
 const ASSETS = ['./', './index.html'];
 
