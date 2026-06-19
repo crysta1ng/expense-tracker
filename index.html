@@ -37,6 +37,7 @@ input{font-family:'Polymath',sans-serif;}
   <div class="scrl" id="scrl"></div>
   <div id="nav"></div>
   <div id="toast"></div>
+  <div id="install"></div>
   <div id="sheet"></div>
 </div>
 <input type="file" id="photoCamera" accept="image/*" capture="environment" style="display:none;">
@@ -911,6 +912,22 @@ function optionSheet(title, items){
       '<div style="font-size:16px;font-weight:800;color:'+INK+';margin-bottom:4px;">'+esc(title)+'</div>'+rows+
     '</div></div>';
 }
+/* ---------- install hint (Add to Home Screen) ---------- */
+var deferredPrompt=null;
+function isStandalone(){ return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true; }
+function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent||''); }
+function installDismissed(){ try{ return localStorage.getItem('et_install_dismissed')==='1'; }catch(e){ return false; } }
+function renderInstall(){
+  var el=document.getElementById('install'); if(!el) return;
+  if(isStandalone()||installDismissed()||(!deferredPrompt && !isIOS())){ el.innerHTML=''; return; }
+  var iosShare='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;"><path d="M12 15V4"></path><path d="M8 8l4-4 4 4"></path><path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>';
+  var body = deferredPrompt
+    ? '<div style="flex:1;font-size:13.5px;color:var(--text);font-weight:600;">Install the app for a full-screen experience.</div><div data-act="doInstall" style="background:'+GREEN+';color:#fff;font-weight:700;font-size:13px;padding:9px 14px;border-radius:11px;cursor:pointer;white-space:nowrap;">Install</div>'
+    : '<div style="flex:1;font-size:13px;color:var(--text);font-weight:600;line-height:1.5;">Add to your Home Screen: tap '+iosShare+' then <b>Add to Home Screen</b>.</div>';
+  el.innerHTML='<div style="position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(20,23,28,.20);">'+body+'<div data-act="dismissInstall" style="color:#9AA0AB;cursor:pointer;display:flex;flex:none;padding:2px;">'+svg('<path d="M6 6l12 12M18 6L6 18"></path>',16)+'</div></div>';
+}
+window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredPrompt=e; renderInstall(); });
+window.addEventListener('appinstalled', function(){ deferredPrompt=null; try{ localStorage.setItem('et_install_dismissed','1'); }catch(e){} renderInstall(); });
 function applyTheme(){ var f=document.querySelector('.frame'); if(f) f.classList.toggle('dark', (state&&state.theme)==='dark'); var mt=document.querySelector('meta[name=theme-color]'); if(mt) mt.setAttribute('content', state&&state.theme==='dark'?'#0B1426':'#E9F1FC'); }
 function go(s){ ui.screen=s; var sc=document.getElementById('scrl'); if(sc)sc.scrollTop=0; render(); }
 var _toastT;
@@ -1115,6 +1132,8 @@ var ACTIONS={
   photoSheet:function(){ syncInputs(); ui.photoTarget='tx'; ui.sheet='photo'; render(); },
   closeSheet:function(){ ui.sheet=''; render(); },
   setTheme:function(a){ state.theme=a; save(); render(); },
+  doInstall:function(){ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(function(){ deferredPrompt=null; renderInstall(); }); } },
+  dismissInstall:function(){ try{ localStorage.setItem('et_install_dismissed','1'); }catch(e){} renderInstall(); },
   openProfile:function(){ ui.profileName=(state.profile&&state.profile.name)||''; go('profile'); },
   saveProfile:function(){ syncInputs(); if(!state.profile) state.profile={name:'',photo:''}; state.profile.name=(ui.profileName||'').trim(); save(); go('settings'); flash('✓ Profile saved'); },
   profilePhotoSheet:function(){ syncInputs(); ui.photoTarget='profile'; ui.sheet='photo'; render(); },
@@ -1256,7 +1275,7 @@ document.getElementById('importInput').addEventListener('change', function(e){
 ['gesturestart','gesturechange','gestureend'].forEach(function(ev){ document.addEventListener(ev, function(e){ e.preventDefault(); }, {passive:false}); });
 document.addEventListener('wheel', function(e){ if(e.ctrlKey) e.preventDefault(); }, {passive:false});
 document.addEventListener('keydown', function(e){ if((e.ctrlKey||e.metaKey) && (e.key==='+'||e.key==='-'||e.key==='='||e.key==='0')) e.preventDefault(); });
-state=load(); resetUI(); postDueRecurring(); render();
+state=load(); resetUI(); postDueRecurring(); render(); renderInstall();
 /* single-file build: service worker omitted */
 </script>
 
