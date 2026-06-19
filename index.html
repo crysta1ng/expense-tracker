@@ -911,11 +911,12 @@ function installStepsSheet(){
   var dotsI='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>';
   var moreI=svg('<circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle>',18);
   var addI=svg('<rect x="4" y="3" width="16" height="18" rx="3"></rect><path d="M12 9v6M9 12h6"></path>',18);
+  var chevD=svg('<path d="M6 9l6 6 6-6"></path>',18);
   var step=function(n,icon,text){ return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);">'+
     '<div style="width:24px;height:24px;border-radius:50%;background:'+HERO+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none;">'+n+'</div>'+
     iconBubble(icon)+'<div style="flex:1;font-size:14px;font-weight:600;color:var(--text);line-height:1.4;">'+text+'</div></div>'; };
   var steps = isIOS()
-    ? step(1,shareI,'Tap the <b>Share</b> button in Safari’s toolbar')+step(2,moreI,'Scroll down the share sheet')+step(3,addI,'Tap <b>Add to Home Screen</b>, then <b>Add</b>')
+    ? step(1,moreI,'Tap the <b>•••</b> (More) button at the bottom')+step(2,shareI,'Tap <b>Share</b>')+step(3,chevD,'Tap <b>View More</b> in the share row')+step(4,addI,'Tap <b>Add to Home Screen</b>')
     : step(1,dotsI,'Tap the <b>⋮ menu</b> (top-right)')+step(2,moreI,'Tap <b>Add to Home screen</b> (or “Install app”)')+step(3,addI,'Confirm <b>Add</b> — done!');
   return '<div data-act="closeSheet" style="position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:46;display:flex;align-items:flex-end;">'+
     '<div data-act="noop" style="width:100%;background:var(--surface);border-radius:20px 20px 0 0;padding:18px 18px calc(env(safe-area-inset-bottom,0px) + 18px);box-sizing:border-box;">'+
